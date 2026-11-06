@@ -258,6 +258,50 @@ h2 {
   margin-top: 1.5rem;
 }
 
+/* Addresses */
+
+.address-list {
+  border: 1px solid #444;
+  border-radius: 6px;
+  padding: 1rem;
+  margin: 1.5rem 0;
+}
+
+.address-list legend {
+  padding: 0 0.4em;
+  font-weight: 600;
+}
+
+.address-item {
+  border-top: 1px solid #333;
+  margin-top: 1rem;
+  padding-top: 1rem;
+}
+
+.address-item:first-of-type {
+  border-top: none;
+  margin-top: 0;
+  padding-top: 0;
+}
+
+.address-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+}
+
+.address-header h3 {
+  font-size: 1em;
+  margin: 0;
+}
+
+.empty-hint {
+  color: #888;
+  font-size: 0.9em;
+  margin: 0 0 1rem;
+}
+
 .error-message {
   background-color: rgba(231, 76, 60, 0.15);
   border: 1px solid #e74c3c;
@@ -307,6 +351,14 @@ h2 {
   .data-table th,
   .data-table td {
     border-bottom-color: #ddd;
+  }
+
+  .address-list {
+    border-color: #ccc;
+  }
+
+  .address-item {
+    border-top-color: #ddd;
   }
 
   .pagination button {

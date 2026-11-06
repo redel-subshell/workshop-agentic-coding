@@ -109,6 +109,29 @@ test('prefills the edit form with the customer data', async ({ page }) => {
   await expect(page.getByLabel(/Geburtsdatum/)).toHaveValue('1985-11-23');
 });
 
+test('adds an address to a customer without listing it in the overview', async ({ page }) => {
+  await page.goto('/customers');
+  await page.getByRole('row', { name: /Erika/ }).getByRole('link', { name: 'Bearbeiten' }).click();
+
+  await page.getByRole('button', { name: 'Adresse hinzufügen' }).click();
+  await page.getByLabel(/Straße/).fill('Musterstraße');
+  await page.getByLabel(/Hausnummer/).fill('1');
+  await page.getByLabel(/Postleitzahl/).fill('12345');
+  await page.getByLabel(/Ort/).fill('Musterstadt');
+  await page.getByRole('button', { name: 'Speichern' }).click();
+
+  await expect(page).toHaveURL('/customers');
+  await expect(page.locator('tbody')).not.toContainText('Musterstraße');
+
+  await page.getByRole('row', { name: /Erika/ }).getByRole('link', { name: 'Bearbeiten' }).click();
+  await expect(page.getByLabel(/Straße/)).toHaveValue('Musterstraße');
+
+  await page.getByRole('button', { name: 'Entfernen' }).click();
+  await page.getByRole('button', { name: 'Speichern' }).click();
+
+  await expect(page).toHaveURL('/customers');
+});
+
 test('shows an error message when saving fails', async ({ page }) => {
   await page.goto('/customers');
   await page.getByRole('link', { name: 'Bearbeiten' }).first().click();

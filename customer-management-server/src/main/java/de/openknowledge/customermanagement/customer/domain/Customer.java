@@ -86,6 +86,45 @@ public record Customer(
                                         nullable = false))
                 @OrderColumn(name = "C_POSITION")
                 List<@Valid Contact> additionalPhoneNumbers,
+        @ElementCollection(fetch = FetchType.EAGER)
+                @CollectionTable(
+                        name = "TAB_CUSTOMER_ADDRESS",
+                        joinColumns =
+                                @JoinColumn(
+                                        name = "C_CUSTOMER_ID",
+                                        nullable = false,
+                                        foreignKey =
+                                                @ForeignKey(name = "fk_customer_address_customer")))
+                @AttributeOverride(
+                        name = "street",
+                        column =
+                                @Column(
+                                        name = "C_STREET",
+                                        length = Address.STREET_MAX_LENGTH,
+                                        nullable = false))
+                @AttributeOverride(
+                        name = "houseNumber",
+                        column =
+                                @Column(
+                                        name = "C_HOUSE_NUMBER",
+                                        length = Address.HOUSE_NUMBER_MAX_LENGTH,
+                                        nullable = false))
+                @AttributeOverride(
+                        name = "postalCode",
+                        column =
+                                @Column(
+                                        name = "C_POSTAL_CODE",
+                                        length = Address.POSTAL_CODE_MAX_LENGTH,
+                                        nullable = false))
+                @AttributeOverride(
+                        name = "city",
+                        column =
+                                @Column(
+                                        name = "C_CITY",
+                                        length = Address.CITY_MAX_LENGTH,
+                                        nullable = false))
+                @OrderColumn(name = "C_POSITION")
+                List<@Valid Address> addresses,
         @Valid ExternalUserId externalUserId) {
 
     public Customer withExternalUserId(ExternalUserId newExternalUserId) {
@@ -96,6 +135,7 @@ public record Customer(
                 birthDate,
                 additionalEmails,
                 additionalPhoneNumbers,
+                addresses,
                 newExternalUserId);
     }
 
@@ -107,5 +147,9 @@ public record Customer(
         return ofNullable(additionalPhoneNumbers)
                 .map(Collections::unmodifiableList)
                 .orElse(emptyList());
+    }
+
+    public List<Address> addresses() {
+        return ofNullable(addresses).map(Collections::unmodifiableList).orElse(emptyList());
     }
 }

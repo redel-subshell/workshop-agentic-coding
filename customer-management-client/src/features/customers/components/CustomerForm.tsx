@@ -24,6 +24,7 @@ export function CustomerForm({
       email: defaultValues?.email ?? '',
       phoneNumber: defaultValues?.phoneNumber,
       birthDate: defaultValues?.birthDate,
+      addresses: defaultValues?.addresses ?? [],
     },
     onSubmit: async ({ value }) => {
       onSubmit(value);
@@ -60,6 +61,64 @@ export function CustomerForm({
 
       <form.Field name="birthDate">
         {(field) => <FormField field={field} label="Geburtsdatum" type="date" />}
+      </form.Field>
+
+      <form.Field name="addresses" mode="array">
+        {(addressesField) => (
+          <fieldset className="address-list">
+            <legend>Adressen</legend>
+
+            {addressesField.state.value.length === 0 && (
+              <p className="empty-hint">Keine Adressen hinterlegt.</p>
+            )}
+
+            {addressesField.state.value.map((_, index) => (
+              <div key={index} className="address-item">
+                <div className="address-header">
+                  <h3>Adresse {index + 1}</h3>
+                  <button
+                    type="button"
+                    className="btn btn-delete"
+                    onClick={() => addressesField.removeValue(index)}
+                  >
+                    Entfernen
+                  </button>
+                </div>
+
+                <form.Field name={`addresses[${index}].street`}>
+                  {(field) => <FormField field={field} label="Straße" required />}
+                </form.Field>
+
+                <form.Field name={`addresses[${index}].houseNumber`}>
+                  {(field) => <FormField field={field} label="Hausnummer" required />}
+                </form.Field>
+
+                <form.Field name={`addresses[${index}].postalCode`}>
+                  {(field) => <FormField field={field} label="Postleitzahl" required />}
+                </form.Field>
+
+                <form.Field name={`addresses[${index}].city`}>
+                  {(field) => <FormField field={field} label="Ort" required />}
+                </form.Field>
+              </div>
+            ))}
+
+            <button
+              type="button"
+              className="btn"
+              onClick={() =>
+                addressesField.pushValue({
+                  street: '',
+                  houseNumber: '',
+                  postalCode: '',
+                  city: '',
+                })
+              }
+            >
+              Adresse hinzufügen
+            </button>
+          </fieldset>
+        )}
       </form.Field>
 
       <div className="form-actions">

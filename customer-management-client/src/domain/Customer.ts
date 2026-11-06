@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { addressSchema } from './Address';
 
 export const customerSchema = z.object({
   name: z.object({
@@ -27,6 +28,7 @@ export const customerSchema = z.object({
     )
     .or(z.undefined()),
   birthDate: z.string().or(z.undefined()),
+  addresses: z.array(addressSchema),
 });
 
 export type Customer = z.infer<typeof customerSchema>;

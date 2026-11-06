@@ -87,6 +87,117 @@ class CustomerControllerTest {
     }
 
     @Test
+    void createCustomerWithAddresses() throws Exception {
+        // Given
+        RestClient client = clientBuilder.build();
+
+        // When
+        var createResponse =
+                client.post()
+                        .uri("/customers")
+                        .contentType(APPLICATION_JSON)
+                        .body(
+                                """
+                                {
+                                    "name": {
+                                        "firstName": "Max",
+                                        "lastName": "Mustermann"
+                                    },
+                                    "email": "max.addresses@example.com",
+                                    "addresses": [
+                                        {
+                                            "street": "Musterstraße",
+                                            "houseNumber": "1",
+                                            "postalCode": "12345",
+                                            "city": "Musterstadt"
+                                        }
+                                    ]
+                                }
+                                """)
+                        .retrieve()
+                        .toBodilessEntity();
+
+        // Then
+        assertThat(createResponse.getStatusCode().value()).isEqualTo(CREATED.value());
+        Map<String, Object> created =
+                getCustomer(client, createResponse.getHeaders().getLocation());
+        assertThat((List<Map<String, Object>>) created.get("addresses"))
+                .containsExactly(
+                        Map.of(
+                                "street",
+                                "Musterstraße",
+                                "houseNumber",
+                                "1",
+                                "postalCode",
+                                "12345",
+                                "city",
+                                "Musterstadt"));
+    }
+
+    @Test
+    void updateCustomerAddresses() throws Exception {
+        // Given
+        RestClient client = clientBuilder.build();
+        URI location = createCustomer(client, "max.update.addresses@example.com");
+
+        // When
+        var updateResponse =
+                client.put()
+                        .uri(location)
+                        .contentType(APPLICATION_JSON)
+                        .body(
+                                """
+                                {
+                                    "name": {
+                                        "firstName": "Max",
+                                        "lastName": "Mustermann"
+                                    },
+                                    "email": "max.update.addresses@example.com",
+                                    "addresses": [
+                                        {
+                                            "street": "Neue Straße",
+                                            "houseNumber": "2",
+                                            "postalCode": "54321",
+                                            "city": "Neustadt"
+                                        },
+                                        {
+                                            "street": "Zweite Straße",
+                                            "houseNumber": "3",
+                                            "postalCode": "11111",
+                                            "city": "Zweitstadt"
+                                        }
+                                    ]
+                                }
+                                """)
+                        .retrieve()
+                        .toBodilessEntity();
+
+        // Then
+        assertTrue(updateResponse.getStatusCode().is2xxSuccessful(), "Update successful");
+        Map<String, Object> updated = getCustomer(client, location);
+        assertThat((List<Map<String, Object>>) updated.get("addresses"))
+                .containsExactly(
+                        Map.of(
+                                "street",
+                                "Neue Straße",
+                                "houseNumber",
+                                "2",
+                                "postalCode",
+                                "54321",
+                                "city",
+                                "Neustadt"),
+                        Map.of(
+                                "street",
+                                "Zweite Straße",
+                                "houseNumber",
+                                "3",
+                                "postalCode",
+                                "11111",
+                                "city",
+                                "Zweitstadt"));
+    }
+
+    @Test
     void createAndGetCustomer() throws Exception {
         // Given
         RestClient client = clientBuilder.build();
@@ -129,6 +240,7 @@ class CustomerControllerTest {
         assertThat(name.get("firstName")).isEqualTo("Max");
         assertThat(name.get("lastName")).isEqualTo("Mustermann");
         assertThat(body.get("email")).isEqualTo("max.mustermann@example.com");
+        assertThat(body.get("addresses")).isEqualTo(List.of());
         assertThat(body.get("externalUserId")).isEqualTo(11);
     }
 
@@ -480,5 +592,27 @@ class CustomerControllerTest {
                         .onStatus(status -> status.value() == 404, (req, res) -> {})
                         .toBodilessEntity();
         assertThat(notFoundResponse.getStatusCode().value()).isEqualTo(404);
+    }
+
+    private Map<String, Object> getCustomer(RestClient client, URI location) {
+        return client.get()
+                .uri(location)
+                .accept(APPLICATION_JSON)
+                .retrieve()
+                .body(new ParameterizedTypeReference<Map<String, Object>>() {});
+    }
+
+    private URI createCustomer(RestClient client, String email) {
+        return client.post()
+                .uri("/customers")
+                .contentType(APPLICATION_JSON)
+                .body(
+                        "{\"name\":{\"firstName\":\"Max\",\"lastName\":\"Mustermann\"},\"email\":\""
+                                + email
+                                + "\"}")
+                .retrieve()
+                .toBodilessEntity()
+                .getHeaders()
+                .getLocation();
     }
 }
